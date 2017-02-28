@@ -31,7 +31,6 @@ protocol TriangleViewDataSource: class {
    
     override func draw(_ rect: CGRect) {
         if let vertices = dataSource?.scale(sender: self) {
-            
             // join spirograph vertices
             path = UIBezierPath()
             path.move(to: vertices[0])
@@ -45,17 +44,6 @@ protocol TriangleViewDataSource: class {
             path.fill()
         }
 
-        
-//        self.rect = rect
-//        path.move(to: CGPoint(x:0, y:0))
-//        path.addLine(to: CGPoint(x:150, y:150))
-//        path.addLine(to: CGPoint(x:160, y:50))
-//        path.close()
-//        path.lineWidth = CGFloat(lineWidth)
-//        fillColor.setFill()
-//        strokeColor.setStroke()
-//        path.stroke()
-//        path.fill()
-//        print("\n HELLO WORLD \n")
+    
     }
 }

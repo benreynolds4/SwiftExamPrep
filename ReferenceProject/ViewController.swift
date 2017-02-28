@@ -8,20 +8,33 @@
 
 import UIKit
 
-
-
 class ViewController: UIViewController, TriangleViewDataSource {
 
     @IBOutlet weak var storedDetails: UILabel!
     @IBOutlet weak var devicesLabel: UILabel!
     @IBOutlet weak var swipeLabel: UILabel!
     @IBOutlet weak var sliderVal: UISlider!
+    var tableData = [String]()
     var currentScale:CGFloat = 1.0
     
-    var tableData = [String]()
+    // Triangle view hooked up with the control drag from storyboard.
+    @IBOutlet weak var triangleView: TriangleView! {
+        didSet {
+            triangleView.dataSource = self
+        }
+    }
+    
+    // Instance of the triangle model created, on setting it then calls updateUI and sets points for
+    // triangle.
+    var triangleModel = TriangleModel() {
+        didSet {
+            triangleModel.setPoints(x: CGPoint(x:10, y:10), y: CGPoint(x:30, y:0), z: CGPoint(x:20, y:20))
+            updateUI()
+        }
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
         /* Gestures */
         let leftSwipe = UISwipeGestureRecognizer(target: self, action: #selector(self.handleSwipes(sender:)))
         let rightSwipe = UISwipeGestureRecognizer(target: self, action: #selector(self.handleSwipes(sender:)))
@@ -41,66 +54,66 @@ class ViewController: UIViewController, TriangleViewDataSource {
         view.addGestureRecognizer(panGesture)
         view.addGestureRecognizer(screenEdgeGesture)
         
+        
+        // User Defaults is like sharedPreferences in Android, stores data or objects
         self.testUserDefaults()
+        
+        // Property lists are like a file version of a database
         self.readPropertyLists()
         self.addToPropertyList(value:"Ben Reynolds")
 
     }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
     
-    @IBOutlet weak var triangleView: TriangleView! {
-        didSet {
-            triangleView.dataSource = self
-        }
-    }
-    
-    var triangleModel = TriangleModel() {
-        didSet {
-            updateUI()
-        }
-    }
-    
+    // Update UI is called when the triangle mode is set
+    // it reloads the custom view.
     private func updateUI() {
         self.triangleView.setNeedsDisplay()
     }
-
+    
+    
+    // Called on Tap Gesture. 
+    // Scales the Triangle By 1.5 bu setting a new instance of the TriangleModel with scaled vales
     func changeSize(sender: UITapGestureRecognizer) {
         currentScale = CGFloat(triangleModel.scale)
-        triangleModel = TriangleModel(Start: CGPoint(x: 0, y: 0), Scale: self.currentScale * 1.5)
+        triangleModel = TriangleModel(x: CGPoint(x:10, y:10), y: CGPoint(x:17, y:25), z: CGPoint(x:20, y:20),  Scale: self.currentScale * 1.5)
         triangleModel.scale = self.currentScale * 1.5
     }
     
+    // Action for the slider in the View.
+    //  Scales the Triangle By setting a new instance of the TriangleModel with scaled vales
     @IBAction func setSliderScale(_ sender: UISlider) {
-        triangleModel = TriangleModel(Start: CGPoint(x: 0, y: 0), Scale: CGFloat(sliderVal.value))
+        triangleModel = TriangleModel(x: CGPoint(x:10, y:10), y: CGPoint(x:17, y:25), z: CGPoint(x:20, y:20), Scale: CGFloat(sliderVal.value))
     }
     
-    /* slider method */
+    // Delegate Method. Protocol is set in the custom view.
+    // This method gets the array from the triangleModel and returns them to the
+    // draw method in the custom view.
     func scale(sender: TriangleView) -> [CGPoint]? {
-        var vertices = triangleModel.scale(atCenter: CGPoint(x: 0, y: 0))
+        let vertices = triangleModel.scale(atCenter: CGPoint(x: 0, y: 0))
         return vertices
     }
-    
     
     /* Gesture Methods */
     func changeColor(_ sender: UITapGestureRecognizer) {
         swipeLabel.textColor = UIColor.darkGray
     }
+    /* Gesture Methods */
     func changeFontSizeLarger(sender: UIRotationGestureRecognizer) {
         swipeLabel.font = UIFont(name: swipeLabel.font.fontName, size: 30)
     }
+    /* Gesture Methods */
     func changeFontSizeSmaller(sender: UIRotationGestureRecognizer) {
         swipeLabel.font = UIFont(name: swipeLabel.font.fontName, size: 10)
     }
+    /* Gesture Methods */
     func changeText(sender: UIPinchGestureRecognizer) {
         swipeLabel.text = "PINCHED"
     }
+    /* Gesture Methods */
     func changeTextEdge(sender: UIPinchGestureRecognizer) {
         swipeLabel.text = "Edge"
     }
+    /* Gesture Methods */
     func handleSwipes(sender: UISwipeGestureRecognizer) {
         if(sender.direction == .left) {
             print("Left Swipe")
