@@ -16,6 +16,7 @@ class ViewController: UIViewController, TriangleViewDataSource {
     @IBOutlet weak var devicesLabel: UILabel!
     @IBOutlet weak var swipeLabel: UILabel!
     @IBOutlet weak var sliderVal: UISlider!
+    var currentScale:CGFloat = 1.0
     
     var tableData = [String]()
     override func viewDidLoad() {
@@ -24,7 +25,7 @@ class ViewController: UIViewController, TriangleViewDataSource {
         /* Gestures */
         let leftSwipe = UISwipeGestureRecognizer(target: self, action: #selector(self.handleSwipes(sender:)))
         let rightSwipe = UISwipeGestureRecognizer(target: self, action: #selector(self.handleSwipes(sender:)))
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.changeColor(_:)))
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.changeSize(sender:)))
         let pinchGesture = UIPinchGestureRecognizer(target: self, action: #selector(self.changeText(sender:)))
         let rotationGesture = UIRotationGestureRecognizer(target:self, action:#selector(self.changeFontSizeLarger(sender:)))
         let panGesture = UIPanGestureRecognizer(target:self, action:#selector(self.changeFontSizeSmaller(sender:)))
@@ -67,9 +68,14 @@ class ViewController: UIViewController, TriangleViewDataSource {
         self.triangleView.setNeedsDisplay()
     }
 
+    func changeSize(sender: UITapGestureRecognizer) {
+        currentScale = CGFloat(triangleModel.scale)
+        triangleModel = TriangleModel(Start: CGPoint(x: 0, y: 0), Scale: self.currentScale * 1.5)
+        triangleModel.scale = self.currentScale * 1.5
+    }
     
     @IBAction func setSliderScale(_ sender: UISlider) {
-        triangleModel = TriangleModel(Start: CGPoint(x: 0, y: 0), Scale: Int(sliderVal.value))
+        triangleModel = TriangleModel(Start: CGPoint(x: 0, y: 0), Scale: CGFloat(sliderVal.value))
     }
     
     /* slider method */

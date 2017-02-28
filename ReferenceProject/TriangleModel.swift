@@ -7,16 +7,17 @@
 //
 
 import Foundation
+import UIKit
 
 class TriangleModel: NSObject {
-    convenience init(Start: CGPoint, Scale: Int) {
+    convenience init(Start: CGPoint, Scale: CGFloat) {
         self.init()
         self.start = Start
         self.scale = Scale
     }
     
     var start: CGPoint = CGPoint(x: 0, y: 0)
-    var scale: Int = 1
+    var scale: CGFloat = 1
     
     func scale(atCenter center: CGPoint) -> [CGPoint] {
         var vertices = [CGPoint]()
