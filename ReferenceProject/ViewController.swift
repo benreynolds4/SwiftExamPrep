@@ -6,17 +6,21 @@
 //  Copyright © 2017 Ben Reynolds. All rights reserved.
 //
 
+
+
 import UIKit
 
-
-
 class ViewController: UIViewController, TriangleViewDataSource {
-
+    
+    
+    
     @IBOutlet weak var storedDetails: UILabel!
     @IBOutlet weak var devicesLabel: UILabel!
     @IBOutlet weak var swipeLabel: UILabel!
     @IBOutlet weak var sliderVal: UISlider!
     var currentScale:CGFloat = 1.0
+    
+    @IBOutlet weak var rotateSlider: UISlider!
     
     var tableData = [String]()
     override func viewDidLoad() {
@@ -26,12 +30,20 @@ class ViewController: UIViewController, TriangleViewDataSource {
         let leftSwipe = UISwipeGestureRecognizer(target: self, action: #selector(self.handleSwipes(sender:)))
         let rightSwipe = UISwipeGestureRecognizer(target: self, action: #selector(self.handleSwipes(sender:)))
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.changeSize(sender:)))
+        
         let pinchGesture = UIPinchGestureRecognizer(target: self, action: #selector(self.changeText(sender:)))
+        
         let rotationGesture = UIRotationGestureRecognizer(target:self, action:#selector(self.changeFontSizeLarger(sender:)))
+        
         let panGesture = UIPanGestureRecognizer(target:self, action:#selector(self.changeFontSizeSmaller(sender:)))
+        
         let screenEdgeGesture = UIScreenEdgePanGestureRecognizer(target:self, action:#selector(self.changeTextEdge(sender:)))
+        
         leftSwipe.direction = .left  // .up and .down can be used also.
+        
         rightSwipe.direction = .right
+        
+        
         
         view.addGestureRecognizer(leftSwipe)
         view.addGestureRecognizer(rightSwipe)
@@ -42,15 +54,19 @@ class ViewController: UIViewController, TriangleViewDataSource {
         view.addGestureRecognizer(screenEdgeGesture)
         
         self.testUserDefaults()
+        
         self.readPropertyLists()
+        
         self.addToPropertyList(value:"Ben Reynolds")
-
+        
     }
-
+    
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
+    
     
     @IBOutlet weak var triangleView: TriangleView! {
         didSet {
@@ -64,90 +80,171 @@ class ViewController: UIViewController, TriangleViewDataSource {
         }
     }
     
+    
     private func updateUI() {
         self.triangleView.setNeedsDisplay()
     }
-
+    
+    
+    
     func changeSize(sender: UITapGestureRecognizer) {
-        currentScale = CGFloat(triangleModel.scale)
-        triangleModel = TriangleModel(Start: CGPoint(x: 0, y: 0), Scale: self.currentScale * 1.5)
-        triangleModel.scale = self.currentScale * 1.5
+        currentScale = CGFloat(triangleModel.scaleAmount)
+        // triangleModel = TriangleModel(Start: CGPoint(x: 0, y: 0), Scale: self.currentScale * 1.5)
+        //triangleModel.scale = self.currentScale * 1.5
     }
     
+    
+    
     @IBAction func setSliderScale(_ sender: UISlider) {
-        triangleModel = TriangleModel(Start: CGPoint(x: 0, y: 0), Scale: CGFloat(sliderVal.value))
+        triangleModel = TriangleModel(Scale: CGFloat(sliderVal.value), Rotate: triangleModel.rotateAmount)
     }
+    
+    @IBAction func getSliderRotate(_ sender: UISlider) {
+        triangleModel = TriangleModel(Scale: triangleModel.scaleAmount, Rotate: Int(rotateSlider.value))
+    }
+    
     
     /* slider method */
     func scale(sender: TriangleView) -> [CGPoint]? {
-        var vertices = triangleModel.scale(atCenter: CGPoint(x: 0, y: 0))
+        let vertices = triangleModel.scale()
         return vertices
     }
     
+    func rotate(sender: TriangleView) -> [CGPoint]? {
+        print("getting verticies")
+        let verticies = triangleModel.rotate()
+        return verticies
+        
+    }
+    
+    
     
     /* Gesture Methods */
+    
     func changeColor(_ sender: UITapGestureRecognizer) {
+        
         swipeLabel.textColor = UIColor.darkGray
-    }
-    func changeFontSizeLarger(sender: UIRotationGestureRecognizer) {
-        swipeLabel.font = UIFont(name: swipeLabel.font.fontName, size: 30)
-    }
-    func changeFontSizeSmaller(sender: UIRotationGestureRecognizer) {
-        swipeLabel.font = UIFont(name: swipeLabel.font.fontName, size: 10)
-    }
-    func changeText(sender: UIPinchGestureRecognizer) {
-        swipeLabel.text = "PINCHED"
-    }
-    func changeTextEdge(sender: UIPinchGestureRecognizer) {
-        swipeLabel.text = "Edge"
-    }
-    func handleSwipes(sender: UISwipeGestureRecognizer) {
-        if(sender.direction == .left) {
-            print("Left Swipe")
-            let labelPosition = CGPoint(x:self.swipeLabel.frame.origin.x - 50, y:self.swipeLabel.frame.origin.y )
-            swipeLabel.frame = CGRect(x:labelPosition.x, y:labelPosition.y, width:self.swipeLabel.frame.size.width, height: self.swipeLabel.frame.size.height )
-        } else if(sender.direction == .right) {
-            print("Right Swipe")
-            let labelPosition = CGPoint(x:self.swipeLabel.frame.origin.x + 50, y:self.swipeLabel.frame.origin.y )
-            swipeLabel.frame = CGRect(x:labelPosition.x, y:labelPosition.y, width:self.swipeLabel.frame.size.width, height: self.swipeLabel.frame.size.height )
-        }
+        
     }
     
-    /* User Defualts */
-    func testUserDefaults() {
-        // Stores Ben Reynolds and 22 in User Defaults and pulls it out again. Like SharedPreferences in Android.
-        let name = "Ben Reynolds"
-        let age = 22
-        let ud = UserDefaults.standard
-        ud.setValue(name, forKey: "name")
-        ud.setValue(age, forKey: "age")
-        let nameNew = ud.string(forKey: "name")
-        let ageNew = ud.integer(forKey: "age")
-        storedDetails.text = "Stored \(nameNew! as String): \(ageNew)"
+    func changeFontSizeLarger(sender: UIRotationGestureRecognizer) {
+        
+        swipeLabel.font = UIFont(name: swipeLabel.font.fontName, size: 30)
+        
     }
+    
+    func changeFontSizeSmaller(sender: UIRotationGestureRecognizer) {
+        
+        swipeLabel.font = UIFont(name: swipeLabel.font.fontName, size: 10)
+        
+    }
+    
+    func changeText(sender: UIPinchGestureRecognizer) {
+        
+        swipeLabel.text = "PINCHED"
+        
+    }
+    
+    func changeTextEdge(sender: UIPinchGestureRecognizer) {
+        
+        swipeLabel.text = "Edge"
+        
+    }
+    
+    func handleSwipes(sender: UISwipeGestureRecognizer) {
+        
+        if(sender.direction == .left) {
+            
+            print("Left Swipe")
+            
+            let labelPosition = CGPoint(x:self.swipeLabel.frame.origin.x - 50, y:self.swipeLabel.frame.origin.y )
+            
+            swipeLabel.frame = CGRect(x:labelPosition.x, y:labelPosition.y, width:self.swipeLabel.frame.size.width, height: self.swipeLabel.frame.size.height )
+            
+        } else if(sender.direction == .right) {
+            
+            print("Right Swipe")
+            
+            let labelPosition = CGPoint(x:self.swipeLabel.frame.origin.x + 50, y:self.swipeLabel.frame.origin.y )
+            
+            swipeLabel.frame = CGRect(x:labelPosition.x, y:labelPosition.y, width:self.swipeLabel.frame.size.width, height: self.swipeLabel.frame.size.height )
+            
+        }
+        
+    }
+    
+    
+    
+    /* User Defualts */
+    
+    func testUserDefaults() {
+        
+        // Stores Ben Reynolds and 22 in User Defaults and pulls it out again. Like SharedPreferences in Android.
+        
+        let name = "Ben Reynolds"
+        
+        let age = 22
+        
+        let ud = UserDefaults.standard
+        
+        ud.setValue(name, forKey: "name")
+        
+        ud.setValue(age, forKey: "age")
+        
+        let nameNew = ud.string(forKey: "name")
+        
+        let ageNew = ud.integer(forKey: "age")
+        
+        storedDetails.text = "Stored \(nameNew! as String): \(ageNew)"
+        
+    }
+    
+    
     
     /* Property List Stuff - Plist. */
     
+    
+    
     func readPropertyLists() {
+        
         let path = Bundle.main.path(forResource: "Devices", ofType: "plist")
+        
         let dict = NSDictionary(contentsOfFile: path!)
+        
         tableData = dict!.object(forKey: "AppleDevice") as! [String]
+        
         var output = ""
+        
         for value in tableData {
+            
             output += " " + value
+            
         }
+        
         devicesLabel.text = output
+        
     }
     
+    
+    
     func addToPropertyList(value:String) {
+        
         let paths = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true) as Array
+        
         let documentDirectory = paths[0] as String
+        
         let path = documentDirectory.appending("/newPlist.plist")
+        
         let dict: NSMutableDictionary = ["XInitializerItem": "DoNotEverChangeMe"]
+        
         //saving values
+        
         dict.setObject(value, forKey: "string" as NSCopying)
+        
         //writing to newPlist.plist
+        
         dict.write(toFile: path, atomically: false)
+        
     }
+    
 }
-

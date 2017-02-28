@@ -2,17 +2,23 @@
 //  TriangleView.swift
 //  ReferenceProject
 //
-//  Created by Ben Reynolds on 28/02/2017.
-//  Copyright © 2017 Ben Reynolds. All rights reserved.
-//
 
+//  Created by Ben Reynolds on 28/02/2017.
+
+//  Copyright © 2017 Ben Reynolds. All rights reserved.
+
+//
 
 import Foundation
 import UIKit
 
+
 protocol TriangleViewDataSource: class {
     func scale(sender: TriangleView) -> [CGPoint]?
+    func rotate(sender: TriangleView) -> [CGPoint]?
 }
+
+
 
 @IBDesignable class TriangleView: UIView {
     @IBInspectable var fillColor: UIColor = UIColor.blue
@@ -22,17 +28,38 @@ protocol TriangleViewDataSource: class {
     var rect:CGRect = CGRect()
     
     weak var dataSource: TriangleViewDataSource?
-    
     var triangleScale: CGFloat = 0.95 {
         didSet {
             setNeedsDisplay()
         }
     }
-   
+    
+    var triangleRotate: Int = 50 {
+        didSet {
+            setNeedsDisplay()
+        }
+    }
+    
+
     override func draw(_ rect: CGRect) {
+        
         if let vertices = dataSource?.scale(sender: self) {
-            
+  
             // join spirograph vertices
+            
+            path = UIBezierPath()
+            path.move(to: vertices[0])
+            for vertex in vertices[1..<vertices.count] {
+                path.addLine(to: vertex)            
+            }
+            strokeColor.setStroke()
+            path.lineWidth = CGFloat(lineWidth)
+            path.stroke()
+            fillColor.setFill()
+            path.fill()
+        }
+        if let vertices = dataSource?.rotate(sender: self){
+            print("here")
             path = UIBezierPath()
             path.move(to: vertices[0])
             for vertex in vertices[1..<vertices.count] {
@@ -44,18 +71,7 @@ protocol TriangleViewDataSource: class {
             fillColor.setFill()
             path.fill()
         }
-
         
-//        self.rect = rect
-//        path.move(to: CGPoint(x:0, y:0))
-//        path.addLine(to: CGPoint(x:150, y:150))
-//        path.addLine(to: CGPoint(x:160, y:50))
-//        path.close()
-//        path.lineWidth = CGFloat(lineWidth)
-//        fillColor.setFill()
-//        strokeColor.setStroke()
-//        path.stroke()
-//        path.fill()
-//        print("\n HELLO WORLD \n")
     }
+    
 }
